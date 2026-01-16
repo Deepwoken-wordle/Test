@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MyDle</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #121213;
+  color: white;
+  text-align: center;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(5, 60px);
+  gap: 8px;
+  justify-content: center;
+  margin: 30px auto;
+}
+
+.tile {
+  width: 60px;
+  height: 60px;
+  border: 2px solid #3a3a3c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  text-transform: uppercase;
+}
+
+.correct { background: #538d4e; }
+.present { background: #b59f3b; }
+.absent  { background: #3a3a3c; }
+
+input {
+  font-size: 1.5rem;
+  text-transform: uppercase;
+}
+</style>
+</head>
+
+<body>
+
+<h1>MyDle</h1>
+<div class="grid" id="grid"></div>
+
+<input id="guess" maxlength="5" autofocus />
+<button onclick="submitGuess()">Guess</button>
+
+<script>
+const WORDS = ["APPLE", "GRAPE", "MANGO", "PEACH", "BERRY"];
+const ANSWER = WORDS[Math.floor(Math.random() * WORDS.length)];
+
+let row = 0;
+const grid = document.getElementById("grid");
+
+for (let i = 0; i < 30; i++) {
+  const div = document.createElement("div");
+  div.className = "tile";
+  grid.appendChild(div);
+}
+
+function submitGuess() {
+  const guess = document.getElementById("guess").value.toUpperCase();
+  if (guess.length !== 5) return alert("5 letters only!");
+
+  for (let i = 0; i < 5; i++) {
+    const tile = grid.children[row * 5 + i];
+    tile.textContent = guess[i];
+
+    if (guess[i] === ANSWER[i]) {
+      tile.classList.add("correct");
+    } else if (ANSWER.includes(guess[i])) {
+      tile.classList.add("present");
+    } else {
+      tile.classList.add("absent");
+    }
+  }
+
+  row++;
+  document.getElementById("guess").value = "";
+
+  if (guess === ANSWER) alert("You win!");
+  if (row === 6) alert("Answer was " + ANSWER);
+}
+</script>
+
+</body>
+</html>
