@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>DeepwokenDle</title>
+<title>Deepwokendle</title>
 <style>
 body {
   font-family: Arial, sans-serif;
@@ -13,16 +13,24 @@ body {
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(5, 160px);
+  grid-template-columns: repeat(5, 110px);
   gap: 10px;
   justify-content: center;
   margin: 30px auto;
 }
 
 .tile {
+  width: 110px;
+  height: 110px;
   border: 2px solid #3a3a3c;
-  padding: 12px;
-  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 8px;
+  font-size: 0.85rem;
+  line-height: 1.2;
+  box-sizing: border-box;
 }
 
 .correct { background: #538d4e; }
