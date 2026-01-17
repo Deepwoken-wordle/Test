@@ -92,7 +92,7 @@ button:hover {
 /* Category headers */
 .categories {
   display: grid;
-  grid-template-columns: repeat(6, 100px);
+  grid-template-columns: repeat(7, 100px);
   gap: 10px;
   justify-content: center;
   margin-top: 20px;
@@ -105,7 +105,7 @@ button:hover {
 /* Game grid */
 .grid {
   display: grid;
-  grid-template-columns: repeat(6, 100px);
+  grid-template-columns: repeat(7, 100px);
   gap: 10px;
   justify-content: center;
   margin: 10px auto 30px;
@@ -156,10 +156,12 @@ button:hover {
 .wrong   { background: #8b2f2f !important; border-color: #8b2f2f !important; }
 
 .tile img {
-  width: 80%;
-  height: 80%;
+  width: 90px;
+  height: 90px;
   border-radius: 50%;
   object-fit: cover;
+  backface-visibility: hidden;
+  transform: translateZ(0);
 }
 
 </style>
@@ -184,6 +186,7 @@ button:hover {
   <div>Race</div>
   <div>Gender</div>
   <div>Type</div>
+  <div>Name</div>
 </div>
 
 <div class="grid" id="grid"></div>
@@ -490,7 +493,7 @@ const CHARACTERS = [
   }
 ];
 
-const ANSWER = CHARACTERS[Math.floor(Math.random() * CHARACTERS.length)];
+let ANSWER = CHARACTERS[Math.floor(Math.random() * CHARACTERS.length)];
 
 // ---------------- SETUP ----------------
 const grid = document.getElementById("grid");
@@ -498,8 +501,8 @@ const input = document.getElementById("guessInput");
 const suggestions = document.getElementById("suggestions");
 let row = 0;
 
-// Initialize 6 rows of empty tiles
-for (let i = 0; i < 36; i++) {
+// Initialize 7 rows of empty tiles
+for (let i = 0; i < 42; i++) {
   const div = document.createElement("div");
   div.className = "tile";
   grid.appendChild(div);
@@ -535,8 +538,8 @@ function submitGuess() {
     return;
   }
 
-  const base = row * 6;
-  const attrs = ["image", "luminant", "location", "race", "gender", "type"];
+  const base = row * 7;
+  const attrs = ["image", "luminant", "location", "race", "gender", "type", "name"];
 
   attrs.forEach((attr, i) => {
     const tile = grid.children[base + i];
@@ -551,7 +554,9 @@ function submitGuess() {
           tile.innerHTML = `<img src="${guess.image}" class="pop">`;
         } else {
           tile.textContent = guess[attr];
-          tile.classList.add(guess[attr] === ANSWER[attr] ? "correct" : "wrong");
+          tile.classList.add(
+            guess[attr] === ANSWER[attr] ? "correct" : "wrong"
+          );
           tile.classList.add("pop");
         }
       }, 300); 
@@ -562,16 +567,34 @@ function submitGuess() {
 if (guess.name === ANSWER.name) {
   setTimeout(() => {
     alert("You won!");
-    location.reload(); // reloads after OK is clicked
+    restartGame();
   }, 2000);
 } else if (row === 5) {
   setTimeout(() => {
     alert("Out of guesses! Answer was " + ANSWER.name);
-    location.reload(); // reloads after OK is clicked
+    restartGame();
   }, 2000);
 }
 
   row++;
+  input.value = "";
+  suggestions.innerHTML = "";
+}
+
+function restartGame() {
+  // Pick a new answer
+  ANSWER = CHARACTERS[Math.floor(Math.random() * CHARACTERS.length)];
+
+  // Reset row counter
+  row = 0;
+
+  // Clear grid tiles
+  [...grid.children].forEach(tile => {
+    tile.className = "tile";
+    tile.innerHTML = "";
+  });
+
+  // Clear input
   input.value = "";
   suggestions.innerHTML = "";
 }
@@ -584,5 +607,6 @@ input.addEventListener("keypress", (e) => {
 
 </body>
 </html>
+
 
 
