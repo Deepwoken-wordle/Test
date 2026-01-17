@@ -2,56 +2,188 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Deepwokendle</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DeepwokenDle</title>
+
 <style>
 body {
-  font-family: Arial, sans-serif;
-  background: #0e0e11;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #141a14;
   color: white;
   text-align: center;
+  margin: 0;
+  padding: 20px;
 }
 
-.grid {
+h1 {
+  margin-top: 0;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* Guess input area */
+.guess-box {
+  margin: 20px auto;
+  width: 100%;
+  max-width: 400px;
+  position: relative;
+}
+
+.input-container {
+  display: flex;
+  gap: 8px;
+}
+
+#guessInput {
+  flex: 1;
+  padding: 12px;
+  font-size: 1rem;
+  background: #1b221b;
+  border: 2px solid #3a3a3c;
+  color: white;
+  border-radius: 4px;
+  outline: none;
+}
+
+#guessInput:focus {
+  border-color: #538d4e;
+}
+
+button {
+  padding: 0 20px;
+  background: #538d4e;
+  border: none;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 4px;
+  text-transform: uppercase;
+  transition: background 0.2s;
+}
+
+button:hover {
+  background: #467a42;
+}
+
+/* Autocomplete suggestions */
+.suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: calc(100% - 80px); /* Align with input width */
+  background: #1b221b;
+  border: 1px solid #333;
+  z-index: 10;
+  text-align: left;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.suggestions div {
+  padding: 10px;
+  cursor: pointer;
+  border-bottom: 1px solid #2a332a;
+}
+
+.suggestions div:hover {
+  background: #2a332a;
+}
+
+/* Category headers */
+.categories {
   display: grid;
-  grid-template-columns: repeat(5, 110px);
+  grid-template-columns: repeat(6, 100px);
   gap: 10px;
   justify-content: center;
-  margin: 30px auto;
+  margin-top: 20px;
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  color: #818384;
+}
+
+/* Game grid */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(6, 100px);
+  gap: 10px;
+  justify-content: center;
+  margin: 10px auto 30px;
 }
 
 .tile {
-  width: 110px;
-  height: 110px;
+  width: 100px;
+  height: 100px;
   border: 2px solid #3a3a3c;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 8px;
   font-size: 0.85rem;
-  line-height: 1.2;
+  font-weight: bold;
   box-sizing: border-box;
+  background: transparent;
+  word-wrap: break-word;
+  overflow: hidden;
+  padding: 5px;
 }
 
-.correct { background: #538d4e; }
-.wrong   { background: #8b2f2f; }
+/* --- ANIMATIONS --- */
 
-select, button {
-  font-size: 1rem;
-  margin: 5px;
+/* Pop animation for when content is added */
+.pop {
+  animation: pop 0.2s ease-in-out;
 }
+
+@keyframes pop {
+  0% { transform: scale(0.8); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+/* Flip animation */
+.reveal {
+  animation: flip 0.6s ease-in-out forwards;
+}
+
+@keyframes flip {
+  0% { transform: rotateX(0deg); }
+  50% { transform: rotateX(90deg); background: transparent; }
+  100% { transform: rotateX(0deg); }
+}
+
+.correct { background: #538d4e !important; border-color: #538d4e !important; }
+.wrong   { background: #8b2f2f !important; border-color: #8b2f2f !important; }
+
+.tile img {
+  width: 80%;
+  height: 80%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
 </style>
 </head>
+
 <body>
 
 <h1>DeepwokenDle</h1>
-<p>Guess the character by attributes</p>
 
-<div>
-  <select id="character">
-    <option value="">Select character</option>
-  </select>
-  <button onclick="submitGuess()">Guess</button>
+<div class="guess-box">
+  <div class="input-container">
+    <input id="guessInput" placeholder="Type a character name" autocomplete="off">
+    <button onclick="submitGuess()">Guess</button>
+  </div>
+  <div id="suggestions" class="suggestions"></div>
+</div>
+
+<div class="categories">
+  <div> </div>
+  <div>Luminant</div>
+  <div>Location</div>
+  <div>Race</div>
+  <div>Gender</div>
+  <div>Type</div>
 </div>
 
 <div class="grid" id="grid"></div>
@@ -61,33 +193,109 @@ select, button {
 const CHARACTERS = [
   {
     name: "Akira",
-    luminant: "Etrean",
-    location: "Etris",
+    image: "https://i.imgur.com/GAQCwUn.png",
+    luminant: "The Depths",
+    location: "Scyphozia",
     race: "Etrean",
     gender: "Male",
     type: "NPC"
   },
   {
-    name: "Maestro",
-    luminant: "Voidwalker",
-    location: "Isle of Vigils",
-    race: "Adret",
-    gender: "Male",
-    type: "NPC"
-  },
-  {
-    name: "Ferryman",
-    luminant: "None",
-    location: "Depths",
-    race: "Unknown",
+    name: "Duke Ishamon Erisia",
+    image: "https://i.imgur.com/WIHtfmC.png",
+    luminant: "Etrean Luminant",
+    location: "Erisia",
+    race: "Celtor",
     gender: "Male",
     type: "Boss"
   },
-    {
-    name: "Titus",
-    luminant: "None",
-    location: "Depths",
-    race: "Unknown",
+  {
+    name: "Maestro Evengarde Rest",
+    image: "https://i.imgur.com/XmnSQ80.png",
+    luminant: "Etrean Luminant",
+    location: "Isle of Vigils",
+    race: "Etrean",
+    gender: "Male",
+    type: "Boss"
+  },
+  {
+    name: "Heart of Enmity",
+    image: "https://i.imgur.com/OIH8CAs.png",
+    luminant: "The Depths",
+    location: "Scyphozia",
+    race: "Voice of Enmity",
+    gender: "???",
+    type: "Boss"
+  },
+  {
+    name: "Chaser",
+    image: "https://i.imgur.com/hwXD81p.png",
+    luminant: "The Depths",
+    location: "Eternal Gale",
+    race: "Adret",
+    gender: "Male",
+    type: "Boss"
+  },
+  {
+    name: "Titus Fulminus Destellus",
+    image: "https://i.imgur.com/2tdUArY.png",
+    luminant: "Eastern Luminant",
+    location: "Fort Merit",
+    race: "Khan",
+    gender: "Male",
+    type: "Boss"
+  },
+  {
+    name: "Primadon, Titan of the East",
+    image: "https://i.imgur.com/LdsBnIz.png",
+    luminant: "Eastern Luminant",
+    location: "The Monkey's Paw",
+    race: "Monster",
+    gender: "???",
+    type: "Boss"
+  },
+  {
+    name: "Elder Primadon, The Titan Warlord",
+    image: "https://i.imgur.com/D2rmBtk.png",
+    luminant: "Eastern Luminant",
+    location: "The Monkey's Paw",
+    race: "Monster",
+    gender: "???",
+    type: "Boss"
+  },
+  {
+    name: "Dread Serpent",
+    image: "https://i.imgur.com/MaiHcjL.png",
+    luminant: "Etrean/Eastern Luminant",
+    location: "Voidsea",
+    race: "Monster",
+    gender: "???",
+    type: "Boss"
+  },
+  {
+    name: "Shogun of the Prophet's Guard",
+    image: "https://i.imgur.com/rbqqjYG.png",
+    luminant: "Etrean/Eastern Luminant",
+    location: "???",
+    race: "???",
+    gender: "???",
+    type: "Boss"
+  },
+  {
+    name: "Dravik, The Rat King",
+    image: "https://i.imgur.com/aJ3XUGJ.png",
+    luminant: "Etrean Luminant",
+    location: "The Golden Rat",
+    race: "Etrean",
+    gender: "Male",
+    type: "Boss"
+  },
+  {
+    name: "Ferryman",
+    image: "https://i.imgur.com/hofOI2X.png",
+    luminant: "Eastern Luminant",
+    location: "Voidsea",
+    race: "Krulian",
     gender: "Male",
     type: "Boss"
   }
@@ -97,50 +305,87 @@ const ANSWER = CHARACTERS[Math.floor(Math.random() * CHARACTERS.length)];
 
 // ---------------- SETUP ----------------
 const grid = document.getElementById("grid");
-const select = document.getElementById("character");
+const input = document.getElementById("guessInput");
+const suggestions = document.getElementById("suggestions");
 let row = 0;
 
-CHARACTERS.forEach(c => {
-  const option = document.createElement("option");
-  option.value = c.name;
-  option.textContent = c.name;
-  select.appendChild(option);
-});
-
-for (let i = 0; i < 30; i++) {
+// Initialize 6 rows of empty tiles
+for (let i = 0; i < 36; i++) {
   const div = document.createElement("div");
   div.className = "tile";
   grid.appendChild(div);
 }
 
-// ---------------- LOGIC ----------------
-function submitGuess() {
-  const name = select.value;
-  if (!name) return alert("Pick a character!");
+// ---------------- AUTOCOMPLETE ----------------
+input.addEventListener("input", () => {
+  const value = input.value.toLowerCase();
+  suggestions.innerHTML = "";
+  if (!value) return;
 
-  const guess = CHARACTERS.find(c => c.name === name);
-  const attrs = ["luminant", "location", "race", "gender", "type"];
+  CHARACTERS
+    .filter(c => c.name.toLowerCase().includes(value))
+    .forEach(c => {
+      const div = document.createElement("div");
+      div.textContent = c.name;
+      div.onclick = () => {
+        input.value = c.name;
+        suggestions.innerHTML = "";
+        submitGuess(); // Optional: submit automatically on click
+      };
+      suggestions.appendChild(div);
+    });
+});
+
+// ---------------- GUESS LOGIC ----------------
+function submitGuess() {
+  const guessName = input.value.trim();
+  const guess = CHARACTERS.find(c => c.name.toLowerCase() === guessName.toLowerCase());
+  
+  if (!guess) {
+    alert("Invalid character!");
+    return;
+  }
+
+  const base = row * 6;
+  const attrs = ["image", "luminant", "location", "race", "gender", "type"];
 
   attrs.forEach((attr, i) => {
-    const tile = grid.children[row * 5 + i];
-    tile.innerHTML = `<strong>${attr.toUpperCase()}</strong><br>${guess[attr]}`;
+    const tile = grid.children[base + i];
+    
+    // Use setTimeout to create a staggered flip effect
+    setTimeout(() => {
+      tile.classList.add("reveal");
+      
+      // Change content and color halfway through the flip
+      setTimeout(() => {
+        if (attr === "image") {
+          tile.innerHTML = `<img src="${guess.image}" class="pop">`;
+        } else {
+          tile.textContent = guess[attr];
+          tile.classList.add(guess[attr] === ANSWER[attr] ? "correct" : "wrong");
+          tile.classList.add("pop");
+        }
+      }, 300); 
 
-    if (guess[attr] === ANSWER[attr]) {
-      tile.classList.add("correct");
-    } else {
-      tile.classList.add("wrong");
-    }
+    }, i * 150); // Each tile starts flipping 150ms after the previous one
   });
 
   if (guess.name === ANSWER.name) {
-    setTimeout(() => alert("You guessed the character!"), 100);
+    setTimeout(() => alert("You won!"), 2000);
+  } else if (row === 5) {
+    setTimeout(() => alert("Out of guesses! Answer was " + ANSWER.name), 2000);
   }
 
   row++;
+  input.value = "";
+  suggestions.innerHTML = "";
 }
+
+// Allow "Enter" key to submit
+input.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") submitGuess();
+});
 </script>
 
 </body>
 </html>
-
-
